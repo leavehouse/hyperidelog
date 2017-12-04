@@ -1,7 +1,10 @@
 import { h, app } from "hyperapp"
+import { storeData, retrieveData } from './local-storage'
 
 // in US dollars
 const FEE_PER_RIDE = 3;
+
+const newPaymentInitState = ({ isInit: false, value: '' });
 
 const AddPanel = ({ addRide, newPayment, submitPayment, state }) => {
   const newPaymentForm = !state.isInit ? null : (
@@ -61,19 +64,18 @@ function createNewPayment(amount) {
   return { timestamp: Date.now(), amount: amount }
 }
 
-const ridelog = {
-  state: {
-    rides: { list: [] },
-    payments: {
-      list: [],
-      new: {
-        isInit: false,
-        value: ''
-      },
-    },
+const initState = retrieveData() || ({
+  rides: { list: [] },
+  payments: {
+    list: [],
+    new: newPaymentInitState,
   },
+});
+
+const ridelog = {
+  state: initState,
   view: state => actions => (
-    h('main', {}, [
+    h('main', { onupdate() { storeData(state) } }, [
       AddPanel({ addRide: actions.rides.add, newPayment: actions.payments.new,
                  submitPayment: actions.payments.submit,
                  state: state.payments.new }),
@@ -93,7 +95,7 @@ const ridelog = {
       new: {
         init: () => state => ({ isInit: true, value: state.value }),
         update: newValue => state => ({ isInit: state.isInit, value: newValue }),
-        cancel: () => state => ({ isInit: false, value: '' }),
+        cancel: () => state => newPaymentInitState,
       },
       submit: event => state => {
         event.preventDefault();
@@ -103,7 +105,7 @@ const ridelog = {
           return { list: state.list, new: state.new }
         } else {
           return { list: state.list.concat([createNewPayment(parsedAmount)]),
-                   new: { isInit: false, value: '' } }
+                   new: newPaymentInitState }
         }
       },
       remove: ts => state => ({ list: state.list.filter(ride => ride.timestamp !== ts),
