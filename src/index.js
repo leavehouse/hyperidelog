@@ -20,13 +20,26 @@ const initState = retrieveData() || ({
   },
 });
 
+// `type` is either 'ride' or 'payment'. `ts` is the timestamp
+function makeRemovalConfirmMessage(type, ts) {
+  const formattedTimestamp = new Date(ts).toLocaleString();
+  return "Do you wish to remove the "+type+" from "+formattedTimestamp+"?";
+}
+
 const ridelog = {
   state: initState,
   view: mainView,
   actions: {
     rides: {
       add: () => state => ({ list: state.list.concat([createNewRide()]) }),
-      remove: ts => state => ({ list: state.list.filter(ride => ride.timestamp !== ts) }),
+      remove: ts => state => {
+        const confirmMessage = makeRemovalConfirmMessage('ride', ts);
+        if (window.confirm(confirmMessage)) {
+          return { list: state.list.filter(ride => ride.timestamp !== ts) };
+        } else {
+          return state;
+        }
+      }
     },
     payments: {
       new: {
@@ -39,14 +52,21 @@ const ridelog = {
         const parsedAmount = parseInt(state.new.value);
         if (isNaN(parsedAmount)) {
           alert("Payment amount must be an integer.");
-          return { list: state.list, new: state.new }
+          return state
         } else {
           return { list: state.list.concat([createNewPayment(parsedAmount)]),
                    new: newPaymentInitState }
         }
       },
-      remove: ts => state => ({ list: state.list.filter(ride => ride.timestamp !== ts),
-                                new: state.new }),
+      remove: ts => state => {
+        const confirmMessage = makeRemovalConfirmMessage('payment', ts);
+        if (window.confirm(confirmMessage)) {
+          return { list: state.list.filter(payment => payment.timestamp !== ts),
+                   new: state.new };
+        } else {
+          return state;
+        }
+      }
     },
   }
 };
