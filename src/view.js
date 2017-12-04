@@ -33,7 +33,7 @@ function displayTimestamp(ts) {
 const RidesView = ({ rides, removeRide }) => (
   h('div', {}, [
     h('h1', {}, 'Rides'),
-    h('ul', {}, [
+    h('ul', {class: 'list-view'}, [
       rides.map(ride => h('li', {}, [
         displayTimestamp(ride.timestamp),
         h('button', { type: 'button', onclick() { removeRide(ride.timestamp) } }, '×')
@@ -45,7 +45,7 @@ const RidesView = ({ rides, removeRide }) => (
 const PaymentsView = ({ payments, removePayment }) => (
   h('div', {}, [
     h('h1', {}, 'Payments'),
-    h('ul', {}, [
+    h('ul', {class: 'list-view'}, [
       payments.map(payment => h('li', {}, [
         '$'+payment.amount+' on '+displayTimestamp(payment.timestamp),
         h('button', { type: 'button', onclick() { removePayment(payment.timestamp) } }, '×')
