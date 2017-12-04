@@ -8,7 +8,8 @@ const AddPanel = ({ addRide, initPayment, updatePaymentValue, cancelPayment,
   const newPaymentForm = !paymentIsInit ? null : (
     h('form', { onsubmit(e) { submitPayment(e) } }, [
       h('input', { type: 'number', placeholder: 'Amount',
-                   oninput(e) { updatePaymentValue(e.target.value) }}),
+                   oninput(e) { updatePaymentValue(e.target.value) },
+                   oncreate(e) { e.focus() } }),
       h('button', { type: 'submit' }, 'Submit'),
       h('button', { type: 'button', onclick() { cancelPayment() } }, 'Cancel'),
     ]));
