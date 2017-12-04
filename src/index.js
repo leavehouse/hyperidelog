@@ -3,27 +3,26 @@ import { h, app } from "hyperapp"
 // in US dollars
 const FEE_PER_RIDE = 3;
 
-const AddPanel = ({ addRide, initPayment, updatePaymentValue, cancelPayment,
-                    submitPayment, paymentIsInit, paymentValue }) => {
-  const newPaymentForm = !paymentIsInit ? null : (
+const AddPanel = ({ addRide, newPayment, submitPayment, state }) => {
+  const newPaymentForm = !state.isInit ? null : (
     h('form', { onsubmit(e) { submitPayment(e) } }, [
-      h('input', { type: 'number', placeholder: 'Amount',
-                   oninput(e) { updatePaymentValue(e.target.value) },
+      h('input', { type: 'number', placeholder: 'Amount', value: state.value,
+                   oninput(e) { newPayment.update(e.target.value) },
                    oncreate(e) { e.focus() } }),
       h('button', { type: 'submit' }, 'Submit'),
-      h('button', { type: 'button', onclick() { cancelPayment() } }, 'Cancel'),
+      h('button', { type: 'button', onclick() { newPayment.cancel() } }, 'Cancel'),
     ]));
 
   return h('div', {}, [
     h('button', { type: 'button', onclick() { addRide() } }, 'Add Ride'),
-    h('button', { type: 'button', onclick() { initPayment() },
-                  disabled: paymentIsInit }, 'Add Payment'),
+    h('button', { type: 'button', onclick() { newPayment.init() },
+                  disabled: state.isInit }, 'Add Payment'),
     newPaymentForm,
   ])
 };
 
 const BalanceDisplay = ({ numRides, paymentAmounts }) => (
-  h('h1', {}, 'Balance: '+(numRides*FEE_PER_RIDE - paymentAmounts.reduce((a, b) => a+b, 0)))
+  h('h1', {}, 'Balance: $'+(numRides*FEE_PER_RIDE - paymentAmounts.reduce((a, b) => a+b, 0)))
 );
 
 function displayTimestamp(ts) {
@@ -75,12 +74,9 @@ const ridelog = {
   },
   view: state => actions => (
     h('main', {}, [
-      AddPanel({ addRide: actions.rides.add, initPayment: actions.payments.new.init,
-                 updatePaymentValue: actions.payments.new.update,
-                 cancelPayment: actions.payments.new.cancel,
+      AddPanel({ addRide: actions.rides.add, newPayment: actions.payments.new,
                  submitPayment: actions.payments.submit,
-                 paymentIsInit: state.payments.new.isInit,
-                 paymentValue: state.payments.new.value }),
+                 state: state.payments.new }),
       BalanceDisplay({ numRides: state.rides.list.length,
                        paymentAmounts: state.payments.list.map(p => p.amount) }),
       RidesView({ rides: state.rides.list, removeRide: actions.rides.remove }),
