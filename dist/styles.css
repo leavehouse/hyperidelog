@@ -3,8 +3,10 @@ input[type=number] {
   width: 4.5em;
 }
 
-.list-view {
-  font-size: 1.4em;
+ul.list-view {
+  font-size: 1.3em;
+  list-style-type: none;
+  padding-left: 0;
 }
 
 button {
